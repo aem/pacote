@@ -60,7 +60,6 @@ function extract (spec, dest, opts) {
         }, { retries: 1 })
       }
     })
-
 }
 
 function extractByDigest (start, spec, dest, opts) {
