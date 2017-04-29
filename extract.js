@@ -12,7 +12,7 @@ const rimraf = BB.promisify(require('rimraf'))
 const readdirAsync = BB.promisify(require('fs').readdir)
 
 module.exports = extract
-function extract(spec, dest, opts) {
+function extract (spec, dest, opts) {
   opts = optCheck(opts)
   spec = typeof spec === 'string' ? npa(spec, opts.where) : spec
   const startTime = Date.now()
@@ -63,7 +63,7 @@ function extract(spec, dest, opts) {
 
 }
 
-function extractByDigest(start, spec, dest, opts) {
+function extractByDigest (start, spec, dest, opts) {
   const xtractor = extractStream(dest, opts)
   const cached = cacache.get.stream.byDigest(opts.cache, opts.integrity, opts)
   return pipe(cached, xtractor).then(() => {
@@ -72,7 +72,7 @@ function extractByDigest(start, spec, dest, opts) {
 }
 
 let fetch
-function extractByManifest(start, spec, dest, opts) {
+function extractByManifest (start, spec, dest, opts) {
   const xtractor = extractStream(dest, opts)
   return BB.resolve(null).then(() => {
     if (!fetch) {
@@ -84,14 +84,14 @@ function extractByManifest(start, spec, dest, opts) {
   })
 }
 
-function cleanUpCached(dest, cachePath, integrity, opts) {
+function cleanUpCached (dest, cachePath, integrity, opts) {
   return BB.join(
     rimraf(dest),
     cacache.rm.content(cachePath, integrity, opts)
   )
 }
 
-function checkOverwrite(extractOverwrite, spec, dest) {
+function checkOverwrite (extractOverwrite, spec, dest) {
   return new BB((resolve, reject) => {
     if (!extractOverwrite) {
       readdirAsync(dest)
