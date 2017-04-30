@@ -16,7 +16,7 @@ function extract (spec, dest, opts) {
   opts = optCheck(opts)
   spec = typeof spec === 'string' ? npa(spec, opts.where) : spec
   const startTime = Date.now()
-  checkOverwrite(opts.extractOverwrite, spec, dest)
+  return checkOverwrite(opts.extractOverwrite, spec, dest)
     .then(() => {
       if (opts.integrity && opts.cache && !opts.preferOnline) {
         opts.log.silly('pacote', 'trying', spec.name, 'by hash:', opts.integrity.toString())
@@ -91,20 +91,16 @@ function cleanUpCached (dest, cachePath, integrity, opts) {
 }
 
 function checkOverwrite (extractOverwrite, spec, dest) {
-  return new BB((resolve, reject) => {
-    if (!extractOverwrite) {
-      readdirAsync(dest)
-        .then((dir) => {
-          const err = new Error(`Attempted to extract ${spec} to non-empty directory ${dest}. Use the extractOverwrite option to override.`)
-          err.target = dest
-          err.code = 'EBADDIR'
-          reject(err)
-        })
-        .catch({ code: 'ENOENT' }, () => {
-          resolve()
-        })
-    } else {
-      resolve()
-    }
-  })
+  if (extractOverwrite) {
+    return BB.resolve()
+  } else {
+    return readdirAsync(dest)
+      .then((dir) => {
+        const err = new Error(`Attempted to extract ${spec} to non-empty directory ${dest}. Use the extractOverwrite option to override.`)
+        err.target = dest
+        err.code = 'EBADDIR'
+        throw err
+      })
+      .catch({ code: 'ENOENT' }, () => {})
+  }
 }
